@@ -23,12 +23,22 @@
 | infoCollect(pid)          | 收集程序信息并写入日志                                      |              |
 | infoReturn(rslt)          | 返回程序执行结果并写入日志                                  |              |
 | hackCreat                 | **系统调用重载**：创建文件权限检查                          |              |
+| hackOpen                  | **系统调用重载**：打开文件权限检查                          |              |
 | hackRead                  | **系统调用重载**：读取文件权限检查                          |              |
 | hackWrite                 | **系统调用重载**：写入文件权限检查                          |              |
 | hackChmod                 | **系统调用重载**：文件权限改变权限检查                      |              |
 | hackGethostid             | **系统调用重载**：获取主机标识符权限检查                    |              |
 
-*系统调用重载函数的接口定义参照linux内核本身定义
+*系统调用重载函数的接口参数定义参照linux内核原本形式
+
+### 数据库访问接口
+
+| 接口                            | 描述           | 返回     |
+| ------------------------------- | -------------- | -------- |
+| connectDB(database)             | 连接数据库     |          |
+| disconnectDB(database)          | 断开数据库连接 |          |
+| queryDB(database, query)        | 查询数据库     | 查询结果 |
+| modifyDB(database, instruction) | 编辑数据库     | 1*       |
 
 ## 数据结构定义
 
