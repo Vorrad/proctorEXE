@@ -5,10 +5,12 @@
 ## 文件目录
 
 - doc/：存放文本文件，如设计书、设计报告等
+- bin/：存放二进制可执行文件
+- include/：存放依赖文件（头文件）
 - src/：存放源码
   - fileaudit/：实例代码
-  - kernel_call/：内核态源码
   - app/：用户层应用源码
+- make.sh：编译规则脚本，后续可能用Makefile或Cmake替代
 - API.md：规定模块间接口、数据结构
 - README.md：项目开发说明
 
@@ -26,6 +28,7 @@
 | docs  | 文档（documentation） |
 | test  | 增加测试              |
 | merge | 代码合并              |
+|refactor|重构（即不是新增功能，也不是修改bug的代码变动）|
 | ...   | ...                   |
 
 - 分支管理
