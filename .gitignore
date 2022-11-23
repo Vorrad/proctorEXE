@@ -56,3 +56,6 @@ cmake-build-debug/
 
 # 临时文件
 ~$*
+
+# 自定义
+fast-start.sh
