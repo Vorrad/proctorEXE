@@ -1,5 +1,7 @@
-#include "../../include/app/typedef.h"
-#include "../../include/general.h"
+/*
+定义了与mysql数据库进行交互的接口
+*/
+#include "../general.h"
 
 /*引入连接Mysql的头文件*/
 #include "/usr/include/mysql/mysql.h"
@@ -10,9 +12,6 @@
 #define USERNAME "root"             /*root用户名*/
 #define PASSWORD NULL               /*数据库连接密码，root用户默认不需要密码*/
 #define DATABASE "proctorEXE_db"    /*数据库名*/
-
-// SQL查询参数
-#define BUFFER_SIZE 4096            /*查询语句最大长度*/
 
 // 函数定义
 
