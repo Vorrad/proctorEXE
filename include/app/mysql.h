@@ -11,10 +11,26 @@
 #define HOST "localhost"            /*MySql服务器地址*/
 #define USERNAME "root"             /*root用户名*/
 #define PASSWORD NULL               /*数据库连接密码，root用户默认不需要密码*/
+
 #define DATABASE "proctorEXE_db"    /*数据库名*/
 #define TABLE_PROGRAM "program"     /*数据表*/
 #define TABLE_POLICY "policy"       /*数据表*/
 #define TABLE_AUDIT "audit"         /*数据表*/
+
+#define TABLE_PROGRAM_VALUES " \
+(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), path VARCHAR(1024))"
+
+#define TABLE_POLICY_VALUES " \
+(id INT PRIMARY KEY AUTO_INCREMENT, prog_id INT NOT NULL,\
+action ENUM(\"create\",\"open\", \"read\", \"write\", \"delete\", \"mkdir\", \"rmdir\") NOT NULL,\
+auth ENUM(\"Y\",\"N\") NOT NULL DEFAULT \"N\",\
+FOREIGN KEY (prog_id) REFERENCES program(id) ON DELETE CASCADE ON UPDATE CASCADE)"
+
+#define TABLE_AUDIT_VALUES " \
+(id INT PRIMARY KEY AUTO_INCREMENT, prog_id INT NOT NULL,\
+action ENUM(\"create\",\"open\", \"read\", \"write\", \"delete\", \"mkdir\", \"rmdir\") NOT NULL,\
+stat ENUM(\"Pass\",\"Deny\") NOT NULL, time DATETIME NOT NULL,\
+FOREIGN KEY (prog_id) REFERENCES program(id) ON DELETE NO ACTION ON UPDATE CASCADE)"
 
 // 函数定义
 
@@ -32,9 +48,6 @@ int create_db(MYSQL* mysql, const char* db_name);
 
 // 使用数据库
 int use_db(MYSQL* mysql, const char* db_name);
-
-// 检查表是否存在
-bool table_exists(MYSQL* mysql, const char* table_name, MYSQL_RES** result);
 
 // 从名称创建表
 int create_table(MYSQL* mysql, const char* table_name, const char* columns);

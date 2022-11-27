@@ -27,34 +27,49 @@ int connect_to_db(MYSQL* mysql, const char* db_name)
     bool flag = db_exists(mysql, db_name);      // 查询数据库是否已存在
     int res;                                    // 状态码
 
-    switch (flag)
+    if (!flag)
     {
-    case false:                                     // 创建数据库
         printf("数据库不存在，创建数据库...");
-        res = create_db(mysql, DATABASE);
+        res = create_db(mysql, db_name);
         if (res == 0)
-            printf("数据库创建成功，检查数据表中...\n");
-            
-        //     res = table_exists(mysql, TABLE_PROGRAM, result)
-        else
         {
-            printf("数据库创建过程中出错，错误码：%d ，已退出\n", res);
-            mysql_close(mysql);
-            return res;
-        }
-    default:                                    // 连接到数据库
-        res = use_db(mysql, DATABASE);           
-        
-        if (res == 0)
-            printf("数据库连接成功\n");
-        else
-        {
-            printf("数据库连接过程中出错，错误码：%d ，已退出\n", res);
-            mysql_close(mysql);
-            return res;
-        }
+            printf("数据库创建成功，创建数据表中...\n");
 
-        return 0;
+            if (res = use_db(mysql,db_name))    // 使用数据库，如果出错则返回
+                return res;
+            
+            res = create_table(mysql, TABLE_PROGRAM, TABLE_PROGRAM_VALUES);
+
+            if (res != 0)
+            {
+                fprintf(stderr,"数据表创建出错，错误码：%d", res);
+                return res;
+            }
+            printf("数据表program已创建...\n");
+            
+            res = create_table(mysql, TABLE_POLICY, TABLE_POLICY_VALUES);
+
+            if (res != 0)
+            {
+                fprintf(stderr,"数据表创建出错，错误码：%d", res);
+                return res;
+            }
+            printf("数据表policy已创建...\n");
+            
+            res = create_table(mysql, TABLE_AUDIT, TABLE_AUDIT_VALUES);
+
+            if (res != 0)
+            {
+                fprintf(stderr,"数据表创建出错，错误码：%d", res);
+                return res;
+            }
+            printf("数据表audit已创建...\n");
+        }
+    }
+    else
+    {
+        if (res = use_db(mysql, db_name))
+            return res;                         // 如果出错则返回错误码
     }
 }
 
@@ -84,7 +99,6 @@ bool db_exists(MYSQL* mysql, const char* db_name)
         
 
     long n = (long) mysql_num_rows(result);
-    printf("n: %ld", n);
     if (!n)
         return false;
     else
@@ -115,26 +129,17 @@ int use_db(MYSQL* mysql, const char* db_name)
     strcat(buffer, db_name);
     flag = mysql_real_query(mysql, buffer, (u_long) strlen(buffer));
 
-    return flag;
-
-}
-
-bool table_exists(MYSQL* mysql, const char* table_name, MYSQL_RES** result)
-{
-    char buffer[BUFFER_SIZE];
-    bool flag;
-
-    // 查询数据库是否存在
-    strcpy(buffer, "SHOW TABLES LIKE \"" );
-    strcat(buffer, table_name);
-    strcat(buffer,"\"");
-    mysql_real_query(mysql, buffer, (u_long) strlen(buffer));
-    *result = mysql_store_result(mysql);
-    if (*result != NULL)
-        return true;
+    if (flag == 0)
+    {
+        printf("数据库连接成功\n");
+        return flag;
+    }       
     else
-        return false;
-    
+    {
+        printf("数据库连接过程中出错，错误码：%d ，已退出\n", flag);
+        mysql_close(mysql);
+        return flag;
+    }
 }
 
 int create_table(MYSQL* mysql, const char* table_name, const char* columns)
@@ -146,6 +151,9 @@ int create_table(MYSQL* mysql, const char* table_name, const char* columns)
     strcat(buffer, table_name);
     strcat(buffer, columns);
     flag = mysql_real_query(mysql, buffer, (u_long) strlen(buffer));
+
+    if(flag)
+        printf("err: %s\n", mysql_error(mysql));
 
     return flag;
 
