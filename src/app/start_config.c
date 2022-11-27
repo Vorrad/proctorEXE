@@ -1,7 +1,7 @@
 // root用户用来配置权限数据库的入口程序
 #include "../../include/general.h"
 #include "../../include/app/mysql.h"
-#include "../../include/app/typedef.h"
+#include "../../include/app/operation.h"
 
 
 bool is_root()
@@ -31,10 +31,8 @@ void login_proc()
     // 登陆MySQL服务
     login_to_db(&connection, HOST, USERNAME, PASSWORD);
     
-    // printf("Please enter command(enter 'help' for help)> ");
-    // char buffer[256];
-    // scanf("%s", buffer);
-    // printf("%s\n",buffer);
+    // 打开控制面板
+    control_panel(&connection);
 
     // 关闭数据库连接
     mysql_close(&connection);
