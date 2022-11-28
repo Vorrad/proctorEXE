@@ -51,3 +51,9 @@ int use_db(MYSQL* mysql, const char* db_name);
 
 // 从名称创建表
 int create_table(MYSQL* mysql, const char* table_name, const char* columns);
+
+// 打印表头
+int dump_field(MYSQL* mysql, MYSQL_RES** result);
+
+// 打印查询结果
+int dump_result(MYSQL* mysql, MYSQL_RES** result);

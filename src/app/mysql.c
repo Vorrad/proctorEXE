@@ -156,5 +156,42 @@ int create_table(MYSQL* mysql, const char* table_name, const char* columns)
         printf("err: %s\n", mysql_error(mysql));
 
     return flag;
+}
 
+int dump_field(MYSQL* mysql, MYSQL_RES** result)
+{
+    MYSQL_FIELD* field;
+    int columns;
+
+    printf("\n");
+
+    columns = mysql_field_count(mysql);
+    for (int i=0; i< columns; i++)
+    {
+        field = mysql_fetch_field(*result);
+        printf("%s\t\t",field->name);
+    }
+    printf("\n\n");
+
+}
+
+int dump_result(MYSQL* mysql, MYSQL_RES** result)
+{
+    long row;
+    int column;
+    MYSQL_ROW result_row;
+
+    row = (long) mysql_num_rows(*result);
+    column = mysql_num_fields(*result);
+    for (int i = 0; i < row; i++)
+    {
+        // 一行数据
+        result_row = mysql_fetch_row(*result);
+        for (int j = 0; j < column; j++)
+        {
+            printf("%s\t\t", result_row[j]);
+        }
+        printf("\n");
+    }
+    printf("\n");
 }
