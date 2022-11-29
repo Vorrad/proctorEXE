@@ -1,0 +1,34 @@
+Usage: COMMAND [OPTIONS]
+
+command                         description
+
+
+help / h                        show this help info.
+quit / q                        quit the control panel.
+exit / e                        same as 'quit'.
+
+show / s [OPTIONS]              show tables in database.
+
+Options:
+    -r / --rule                 show rule list (default)
+    -p / --program              show program list
+    -a / --audit                show audit logs
+
+add  / a [OPTIONS]              insert items into database
+
+Options:
+    -p / --program              add a program to program list
+    -r / --rule                 add a rule to rule list
+
+updt / u [OPTIONS]              update items in database
+
+Options:
+    -p / --program              update a program in program list
+    -r / --rule                 update a rule in rule list
+
+rm   / r [OPTIONS]              remove items in database
+
+Options:
+    -p / --program              remove a program in program list
+    -r / --rule                 remove a rule in rule list
+    -a / --audit                remove an audit record in logs

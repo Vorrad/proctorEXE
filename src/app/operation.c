@@ -2,15 +2,21 @@
 
 void help()
 {
-printf(
+    FILE* fp = NULL;
+    char read_buf[BUFFER_SIZE];
 
-"\ncommand\t\t\tdescription\n\n\
-help / h\t\t\tshow this help info.\n\
-quit / q\t\t\tquit the control panel.\n\
-exit / e\t\t\tsame as \'quit\'.\n\
-show / s\t\t\tshow current rules.\n\n\
-add  / a path\t\t\t\
-\n\n");
+    if ((fp = fopen(HELP_FILE, "r")) == NULL)
+    {
+        printf("help: fail to open file.");
+        return;
+    }
+
+    printf("\n\n");
+    while (fgets(read_buf, BUFFER_SIZE, fp) != NULL)
+        printf("%s",read_buf);
+    printf("\n\n");
+    
+    fclose(fp);
 }
 
 void showRules(MYSQL* mysql)
@@ -30,7 +36,6 @@ void showRules(MYSQL* mysql)
     MYSQL_RES* result;
     
     result = mysql_store_result(mysql);
-    printf("查询成功\n");
     
     if (result)
     {
@@ -39,10 +44,6 @@ void showRules(MYSQL* mysql)
     }
     else
         printf("result is NULL\n");
-    
-
-
-    printf("查询成功\n");
 
     mysql_free_result(result);
 
@@ -79,7 +80,7 @@ void control_panel(MYSQL* mysql)
             showRules(mysql);
             continue;
         }
-        unknown_cmd();    
+        unknown_cmd();
     }
         
 }
