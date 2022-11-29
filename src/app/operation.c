@@ -19,44 +19,14 @@ void help()
     fclose(fp);
 }
 
-void showRules(MYSQL* mysql)
-{
-    int res;
-    char query_buffer[BUFFER_SIZE];
-    strcpy(query_buffer,"SELECT * FROM ");
-    strcat(query_buffer, TABLE_POLICY);
-    printf("querybuf: %s\n",query_buffer);
-    res = mysql_real_query(mysql, query_buffer, (u_long) strlen(query_buffer));
-    
-    if (res) {
-        printf("MySQL 查询出错: %s\n",mysql_error(mysql));
-        return;
-    }
-
-    MYSQL_RES* result;
-    
-    result = mysql_store_result(mysql);
-    
-    if (result)
-    {
-        dump_field(mysql,&result);
-        dump_result(mysql,&result);
-    }
-    else
-        printf("result is NULL\n");
-
-    mysql_free_result(result);
-
-}
-
 void unknown_cmd()
 {
-    printf("无法识别您的指令，请输入 help 查看指令格式\n");
+    printf("Unrecognized command!\n");
 }
 
 void control_panel(MYSQL* mysql)
 {
-    char command[BUFFER_SIZE], para[BUFFER_SIZE];
+    char command[BUFFER_SIZE];
     
     while (true)
     {
@@ -77,10 +47,121 @@ void control_panel(MYSQL* mysql)
 
         if (strcmp(command, "show") * strcmp(command, "s") == 0)
         {
-            showRules(mysql);
+            show(mysql);
             continue;
         }
         unknown_cmd();
     }
         
+}
+
+void show(MYSQL* mysql)
+{
+    // 接收参数
+    char para[BUFFER_SIZE];
+    scanf("%s", para);
+    fflush(stdin);
+
+    if (strcmp(para, "-r") * strcmp(para, "--rule") == 0)
+    {
+        showRules(mysql);
+        return;
+    }
+    if (strcmp(para, "-p") * strcmp(para, "--program") == 0)
+    {
+        showPrograms(mysql);
+        return;
+    }
+    if (strcmp(para, "-a") * strcmp(para, "--audit") == 0)
+    {
+        showLogs(mysql);
+        return;
+    }
+
+    printf("Unrecognized command!\n");    
+}
+
+void showRules(MYSQL* mysql)
+{
+    int res;
+    char query_buffer[BUFFER_SIZE];
+    MYSQL_RES* result;
+
+    strcpy(query_buffer,"SELECT r.id, p.name, r.action, r.auth FROM policy r JOIN program p WHERE r.prog_id=p.id");
+    res = mysql_real_query(mysql, query_buffer, (u_long) strlen(query_buffer));
+    
+    if (res) {
+        printf("MySQL query error: %s\n",mysql_error(mysql));
+        return;
+    }
+    
+    result = mysql_store_result(mysql);    
+    if (result)
+    {
+        dump_field(mysql,&result);
+        dump_result(mysql,&result);
+    }
+    else
+        printf("result is NULL\n");
+
+    mysql_free_result(result);
+    return;
+}
+
+void showPrograms(MYSQL* mysql)
+{
+    int res;
+    char query_buffer[BUFFER_SIZE];
+    MYSQL_RES* result;
+
+    strcpy(query_buffer,"SELECT * FROM ");
+    strcat(query_buffer, TABLE_PROGRAM);
+    res = mysql_real_query(mysql, query_buffer, (u_long) strlen(query_buffer));
+    
+    if (res) {
+        printf("MySQL query error: %s\n",mysql_error(mysql));
+        return;
+    }
+    
+    result = mysql_store_result(mysql);    
+    if (result)
+    {
+        printf("Program list:\n");
+        dump_field(mysql,&result);
+        dump_result(mysql,&result);
+    }
+    else
+        printf("result is NULL\n");
+
+    mysql_free_result(result);
+    return;
+    
+}
+
+void showLogs(MYSQL* mysql)
+{
+    int res;
+    char query_buffer[BUFFER_SIZE];
+    MYSQL_RES* result;
+
+    strcpy(query_buffer,"SELECT a.id, p.name, a.action,a.stat, a.time FROM audit a JOIN program p WHERE a.prog_id=p.id");
+    res = mysql_real_query(mysql, query_buffer, (u_long) strlen(query_buffer));
+    
+    if (res) {
+        printf("MySQL query error: %s\n",mysql_error(mysql));
+        return;
+    }
+    
+    result = mysql_store_result(mysql);    
+    if (result)
+    {
+        dump_field(mysql,&result);
+        dump_result(mysql,&result);
+    }
+    else
+        printf("result is NULL\n");
+
+    mysql_free_result(result);
+    return;
+
 }
