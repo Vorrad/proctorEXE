@@ -10,7 +10,11 @@
 // 用户操作主循环，用于持续接收用户输入并发送相应指令
 void control_panel();
 
+// 由动作索引返回动作
 const char* switchAction(int i);
+
+// MySQL操作处理函数（无需显示返回结果）
+void op_handle(MYSQL* mysql, const char* q);
 
 // 命令：帮助
 void help();

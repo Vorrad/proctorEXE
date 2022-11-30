@@ -61,6 +61,24 @@ const char* switchAction(int i)
     }
 }
 
+void op_handle(MYSQL* mysql, const char* q)
+{
+    int res;
+
+    res = mysql_real_query(mysql, q, strlen(q));
+    if (res)
+    {
+        printf("MySQL query error: %s\n",mysql_error(mysql));
+        return;
+    }
+    else
+    {
+        printf("Operation success.\n");
+    }
+
+
+}
+
 
 void help()
 {
@@ -254,28 +272,32 @@ void addRule(MYSQL* mysql)
         return;
     }
     
-    char query_buffer[BUFFER_SIZE], action_buffer[BUFFER_SIZE];
-    int res;    
+    char query_buf[BUFFER_SIZE];
 
     // 向mysql发送指令
-    sprintf(query_buffer,"INSERT INTO policy VALUES (0,%d,\"%s\",\"%c\")",id, switchAction(action_i), auth);
-    // printf("%s\n",query_buffer);
-    res = mysql_real_query(mysql, query_buffer, (u_long) strlen(query_buffer));
+    sprintf(query_buf,"INSERT INTO policy VALUES (0,%d,\"%s\",\"%c\")",id, switchAction(action_i), auth);
     
-    if (res)
-    {
-        printf("MySQL query error: %s\n",mysql_error(mysql));
-        return;
-    }
-    else
-    {
-        printf("Operation success.\n");
-    }
-
+    op_handle(mysql,query_buf);
 }
 
 void addProgram(MYSQL* mysql)
 {
+    char name[PARA_SIZE], path[PARA_SIZE], query_buf[BUFFER_SIZE];
+
+    // 输入程序名
+    printf("Program name > ");
+    scanf("%s",name);
+    setbuf(stdin, NULL);
+
+    // 输入程序路径
+    printf("Program path (e.g. /bin/bash) > ");
+    scanf("%s",path);
+    setbuf(stdin, NULL);
+
+    // 向mysql发送指令
+    sprintf(query_buf,"INSERT INTO program VALUES (0,\"%s\",\"%s\")",name,path);
+    
+    op_handle(mysql,query_buf);
 
 }
 
