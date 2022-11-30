@@ -35,6 +35,11 @@ void control_panel(MYSQL* mysql)
             update(mysql);
             continue;
         }
+        if (strcmp(command, "rm") * strcmp(command, "r") == 0)
+        {
+            delete(mysql);
+            continue;
+        }
         unknown_cmd();
     }
 }
@@ -170,6 +175,7 @@ void show(MYSQL* mysql)
     }
 
     printf("Unrecognized command!\n");
+    setbuf(stdin,NULL);
     return;
 }
 
@@ -261,7 +267,7 @@ void showLogs(MYSQL* mysql)
 void add(MYSQL* mysql)
 {
     // 接收参数
-    char para[BUFFER_SIZE];
+    char para[PARA_SIZE];
     scanf("%s", para);
     setbuf(stdin, NULL);
     if (strcmp(para, "-r") * strcmp(para, "--rule") == 0)
@@ -276,6 +282,7 @@ void add(MYSQL* mysql)
     }
 
     printf("Unrecognized command!\n");
+    setbuf(stdin,NULL);
     return;
 }
 
@@ -339,7 +346,7 @@ void addProgram(MYSQL* mysql)
 void update(MYSQL* mysql)
 {
     // 接收参数
-    char para[BUFFER_SIZE];
+    char para[PARA_SIZE];
     scanf("%s", para);
     setbuf(stdin, NULL);
 
@@ -355,8 +362,8 @@ void update(MYSQL* mysql)
     }
 
     printf("Unrecognized command!\n");
+    setbuf(stdin,NULL);
     return;
-
 }
 
 void updateRule(MYSQL* mysql)
@@ -444,7 +451,97 @@ void updateProgram(MYSQL* mysql)
     op_handle(mysql,query_buf);
 }
 
+void delete(MYSQL* mysql)
+{
+    // 接收参数
+    char para[PARA_SIZE];
+    scanf("%s", para);
+    setbuf(stdin, NULL);
+
+    if (strcmp(para, "-r") * strcmp(para, "--rule") == 0)
+    {
+        deleteRule(mysql);
+        return;
+    }
+    if (strcmp(para, "-p") * strcmp(para, "--program") == 0)
+    {
+        deleteProgram(mysql);
+        return;
+    }
+    if (strcmp(para, "-a") * strcmp(para, "--audit") == 0)
+    {
+        deleteLog(mysql);
+        return;
+    }
+
+    printf("Unrecognized command!\n");
+    setbuf(stdin,NULL);
+    return;
+}
+
+void deleteRule(MYSQL* mysql)
+{
+    char query_buf[BUFFER_SIZE];
+    int id;
+    bool flag;
+
+    // 输入规则id
+    printf("Enter the rule's id > ");
+    scanf("%d", &id);
+    setbuf(stdin, NULL);
+
+    sprintf(query_buf,"SELECT id FROM policy WHERE id=%d",id);
+    flag = query_is_null(mysql, query_buf);
+
+    if (flag == ERROR)
+        return;
+
+    if (flag)
+    {
+        printf("Rule id not exists\n");
+        return;
+    }
+
+    sprintf(query_buf,"DELETE FROM policy WHERE id=%d",id);
+    
+    op_handle(mysql,query_buf);
+}
+
+void deleteProgram(MYSQL* mysql)
+{
+    char query_buf[BUFFER_SIZE];
+    int id;
+    bool flag;
+
+    // 输入程序id
+    printf("Enter the program's id (related rules will be removed together!) > ");
+    scanf("%d", &id);
+    setbuf(stdin, NULL);
+
+    sprintf(query_buf,"SELECT id FROM program where id=%d",id);
+    flag = query_is_null(mysql, query_buf);
+
+    if (flag == ERROR)
+        return;
+
+    if (flag)
+    {
+        printf("Program id not exists\n");
+        return;
+    }
+
+    sprintf(query_buf,"DELETE FROM program WHERE id=%d",id);
+    
+    op_handle(mysql,query_buf);
+}
+
+void deleteLog(MYSQL* mysql)
+{
+    
+}
+
 void unknown_cmd()
 {
     printf("\nUnrecognized command!\n\n");
+    setbuf(stdin,NULL);
 }

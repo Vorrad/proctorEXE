@@ -27,10 +27,10 @@ auth ENUM(\"Y\",\"N\") NOT NULL DEFAULT \"N\",\
 FOREIGN KEY (prog_id) REFERENCES program(id) ON DELETE CASCADE ON UPDATE CASCADE)"
 
 #define TABLE_AUDIT_VALUES " \
-(id INT PRIMARY KEY AUTO_INCREMENT, prog_id INT NOT NULL,\
+(id INT PRIMARY KEY AUTO_INCREMENT, prog_id INT, prog_name VARCHAR(255),\
 action ENUM(\"create\",\"open\", \"read\", \"write\", \"delete\", \"mkdir\", \"rmdir\") NOT NULL,\
 stat ENUM(\"Pass\",\"Deny\") NOT NULL, time DATETIME NOT NULL,\
-FOREIGN KEY (prog_id) REFERENCES program(id) ON DELETE NO ACTION ON UPDATE CASCADE)"
+FOREIGN KEY (prog_id) REFERENCES program(id) ON DELETE SET NULL ON UPDATE CASCADE)"
 
 // 函数定义
 

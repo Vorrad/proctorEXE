@@ -43,6 +43,9 @@ void updateProgram(MYSQL* mysql);
 
 // 命令：删除
 void delete(MYSQL* mysql);
+void deleteRule(MYSQL* mysql);
+void deleteProgram(MYSQL* mysql);
+void deleteLog(MYSQL* mysql);
 
 // 未知命令
 void unknown_cmd();
