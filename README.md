@@ -1,8 +1,20 @@
-# 项目开发说明
+# 项目说明
 
 [toc]
 
-## 运行方式
+## proctorEXE数据库软件
+
+此部分为proctorEXE系统的用户层数据库应用软件，为用户提供简单便捷的数据库创建和连接、增删改查命令。
+
+### 运行环境
+
+- 操作系统：Linux(Ubuntu 18.10 LTS)
+- 数据库：MySQL 14.14 Distrib 5.7.26
+  - 安装方法：
+  - `sudo apt install mysql-server ` 安装MySQL服务器
+  - `sudo apt install libmysqlclient-dev` 安装MySQL开发包
+
+### 编译
 
 在项目根目录下，用命令行运行：
 
@@ -10,6 +22,11 @@
 2. `sudo bin/start`
 
 请确保在根目录下运行。
+
+### 使用
+
+1. 本软件需要以root身份运行
+2. 输入help以获取帮助
 
 ## 文件目录
 
