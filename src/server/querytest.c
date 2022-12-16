@@ -24,7 +24,10 @@ void test()
         return;
     }
 
-    ret_auth(getpid(), 1);
+    int res;
+    res = ret_auth(getpid(), 4);
+
+    printf("res: %d\n", res);
 
     // // 连接数据库
     // MYSQL connection;                   /*数据库连接*/ 

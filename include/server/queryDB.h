@@ -3,6 +3,8 @@
 
 #define SYSOUT "sysout.txt"     // 执行系统命令后输出保存的文件
 
+#define DEFAULT_AUTH 1          // 默认策略:通过
+
 // 单链表表示下的层级路径表
 typedef struct dir{
     char* name;

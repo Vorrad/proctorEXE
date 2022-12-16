@@ -72,15 +72,49 @@ int ret_auth(pid_t pid, int action)
             break;
     }
 
-    if(flag)
+    if(flag)    // 如果匹配到了路径
     {
         char query_buf[BUFFER_SIZE];
         sprintf(query_buf, "SELECT auth FROM policy WHERE prog_id=%d AND action=\"%s\"", prog_id, switchAction(action));
         printf("querybuf: %s\n", query_buf);
+
+        int res;
+        res = mysql_real_query(&connection, query_buf, (u_long) strlen(query_buf));
+        if (res) {
+            printf("MySQL query error: %s\n",mysql_error(&connection));
+            return -1;
+        }
+        
+        MYSQL_RES* result;
+        result = mysql_store_result(&connection);
+        long row;
+        row = (long) mysql_num_rows(result);
+
+        // 有相关结果
+        if(row)
+        {
+            MYSQL_ROW result_row;
+            int auth;
+            result_row = mysql_fetch_row(result);
+
+            if (strcmp(result_row[0], "Y") == 0)
+                auth = 1;
+            else if (strcmp(result_row[0], "N") == 0)
+                auth = 0;
+            else
+                auth = -1;
+
+            mysql_free_result(result);
+            return auth;
+        }
+
+        // 无结果,返回默认值
+        mysql_free_result(result);
+        return DEFAULT_AUTH;
     }
     else
     {
-        /* 返回默认值 */
+        return DEFAULT_AUTH;
     }
 
     mysql_close(&connection);
@@ -118,6 +152,10 @@ int get_path(pid_t pid, char* path)
             i++;
         }
     }
+
+
+    fclose(fp);
+    remove(SYSOUT);
 
     return 0;
 }
