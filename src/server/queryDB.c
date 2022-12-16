@@ -26,14 +26,60 @@ int ret_auth(pid_t pid)
 
     head = path_to_dirList(path);
 
-    // 遍历层级路径表，匹配路径
+    // 遍历层级路径表，通过路径匹配程序
     node = head;
+    bool flag = false;
+    int prog_id;
     while(1)
     {
         node = node->next;
-        printf("node->name: %s\n", node->name);
+        
+        char dirname[PATH_SIZE];
+        strcpy(dirname, node->name);
+
+        char query_buf[BUFFER_SIZE];
+        sprintf(query_buf, "SELECT id FROM program WHERE path LIKE \"%s\"", dirname);
+        printf("%s\n", query_buf);
+        
+        int res;
+        res = mysql_real_query(&connection, query_buf, (u_long) strlen(query_buf));
+        if (res) {
+            printf("MySQL query error: %s\n",mysql_error(&connection));
+            return -1;
+        }
+        
+        MYSQL_RES* result;
+        result = mysql_store_result(&connection);
+        long row;
+        row = (long) mysql_num_rows(result);
+
+        // 匹配到结果,跳出循环
+        if(row)
+        {
+            MYSQL_ROW result_row;
+            result_row = mysql_fetch_row(result);
+
+            prog_id = atoi(result_row[0]);
+            flag = true;
+
+            mysql_free_result(result);
+            break;
+        }
+
+        mysql_free_result(result);
+
+        // 到达链表尾部,退出循环
         if (node->next == NULL)
             break;
+    }
+
+    if(flag)
+    {
+        /* 查询prog_id的权限表 */
+    }
+    else
+    {
+        /* 返回默认值 */
     }
 
     mysql_close(&connection);
