@@ -10,9 +10,18 @@
 // 用户操作主循环，用于持续接收用户输入并发送相应指令
 void control_panel();
 
+// 由动作索引返回动作
 const char* switchAction(int i);
 
+// MySQL操作处理函数（无需显示返回结果）
+void op_handle(MYSQL* mysql, const char* q);
+
+// MySQL查询结果是否为空
+
+bool query_is_null(MYSQL* mysql, const char* q);
+
 // 命令：帮助
+void action_dump();
 void help();
 
 // 命令：显示
@@ -28,9 +37,15 @@ void addProgram(MYSQL* mysql);
 
 // 命令：更新
 void update(MYSQL* mysql);
+void updateRule(MYSQL* mysql);
+void updateProgram(MYSQL* mysql);
+
 
 // 命令：删除
 void delete(MYSQL* mysql);
+void deleteRule(MYSQL* mysql);
+void deleteProgram(MYSQL* mysql);
+void deleteLog(MYSQL* mysql);
 
 // 未知命令
 void unknown_cmd();
