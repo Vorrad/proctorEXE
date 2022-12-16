@@ -32,11 +32,18 @@ struct prm_msg {
     s32     index;      // 在模块中使用atomic_t的值，为了减少处理，取值范围是signed int
     u32     type;       // 消息类型
     u32     ino;            // inode编号
-    u32     uid;            // 用户uid
+    u32     pid;            // 用户pid
+    s32     action;         // 操作类型
     s32     p_type;         // 权限类型
     s32     result_type;    // 权限查询结果
     u64     sem_msg_ptr;    // 消息标识
 };
+
+//action的取
+#define OPEN            (s32)1
+#define READ            (s32)2
+#define WRITE           (s32)3
+
 
 // prm_msg的type的取值
 #define PRM_MSG_TYPE_CONNECT            (u32)0x00000001     // 用户态向核心态进行注册
@@ -81,7 +88,7 @@ int netlink_release(void);
 
 int netlink_sendmsg(char *buf, size_t len);
 
-int admissionReq(unsigned long ino, uid_t uid, int p_type, int *result);
+int admissionReq(unsigned long ino,int action, pid_t pid, int p_type, int *result);
 
 
 

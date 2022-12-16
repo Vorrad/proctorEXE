@@ -82,7 +82,7 @@ static void nl_data_ready(struct sk_buff *__skb)
     kfree(buf);
 }
 
-int admissionReq(unsigned long ino, uid_t uid, int p_type, int *result)
+int admissionReq(unsigned long ino, int action, pid_t pid_c, int p_type, int *result)
 {
     struct prm_msg msg;
     struct sem_msg *ptr = NULL;
@@ -105,7 +105,8 @@ int admissionReq(unsigned long ino, uid_t uid, int p_type, int *result)
     msg.index = atomic_inc_return(&index);
     msg.type = PRM_MSG_TYPE_CHECK;
     msg.ino = (u32)ino;
-    msg.uid = (u32)uid;
+    msg.pid = (u32)pid_c;
+    msg.action = (s32)action;
     msg.p_type = (s32)p_type;
     msg.sem_msg_ptr = (u64)ptr;
 
