@@ -139,7 +139,7 @@ void help()
 
     if ((fp = fopen(HELP_FILE, "r")) == NULL)
     {
-        printf("help: fail to open filen");
+        printf("help: fail to open file\n");
         return;
     }
 
