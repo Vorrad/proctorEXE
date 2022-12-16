@@ -40,7 +40,7 @@ sys_call_t orig_write;
 //sys_call_t orig_socket;
 //sys_call_t orig_execve;
 
-int get_info_from_fd(unsigned int fd, unsigned long * ino, uid_t * uid, int *type)
+int get_info_from_fd(unsigned int fd, unsigned long * ino, int *type)
 {
     struct file *file_p = NULL;
     struct inode * f_inode = NULL;
@@ -48,7 +48,7 @@ int get_info_from_fd(unsigned int fd, unsigned long * ino, uid_t * uid, int *typ
     struct fd f;
 
     // 获取 uid
-    *uid = current_uid().val;   // unsigned int
+    //*uid = current_uid().val;   // unsigned int
     // 获取fd对应的file struct
     // file_p = fget_raw(fd);
     f = fdget(fd);
@@ -89,12 +89,13 @@ asmlinkage long hacked_openat(struct pt_regs *regs)
 
     // unsigned int fd = 0;
     unsigned long ino = 0;
-    uid_t uid = 0;
+    pid_t pid = 0;
     int f_type = 0;
     int p_result = 0;
     int p_type;
+    int action = OPEN;
 
-    uid = current_uid().val;
+    pid = current->pid;
     if (ret < 0)
     {
         // linux 本身权限控制不通过，不处理
@@ -102,7 +103,7 @@ asmlinkage long hacked_openat(struct pt_regs *regs)
     }
     else
     {
-        if(get_info_from_fd(ret, &ino, &uid, &f_type) == PRM_ERROR)
+        if(get_info_from_fd(ret, &ino , &f_type) == PRM_ERROR)
         {
             
             // 获取inode失败，默认通过
@@ -127,7 +128,7 @@ asmlinkage long hacked_openat(struct pt_regs *regs)
             else
             {
                 int check_ret = PRM_ERROR;
-                check_ret = admissionReq(ino, uid, p_type, &p_result);
+                check_ret = admissionReq(ino, action, pid, p_type, &p_result);
                 if(check_ret != PRM_SUCCESS)
                 {
                     // 权限查询出错，默认通过
@@ -144,14 +145,157 @@ asmlinkage long hacked_openat(struct pt_regs *regs)
     else
     {
         ret = -1;
-        if (p_type == P_REG) printk("Block: open REG file uid=%u inode=%ld\n", uid, ino);
-        if (p_type == P_DIR) printk("Block: open DIR uid=%u inode=%ld\n", uid, ino);
+        if (p_type == P_REG) printk("Block: open REG file inode=%ld\n", ino);
+        if (p_type == P_DIR) printk("Block: open DIR inode=%ld\n", ino);
     }
 
     return ret;
 }
 
+asmlinkage long hacked_read(struct pt_regs * regs)
+{
+    long ret = -1;
 
+    unsigned int fd = 0;
+    unsigned long ino = 0;
+    pid_t pid = 0;
+    int f_type = 0;
+    int p_result = 0;
+    int p_type;
+    int action = READ;
+
+    pid = current->pid;
+    fd = regs->di;
+    if(get_info_from_fd(fd, &ino, &f_type) == PRM_ERROR)
+    {
+        // 文件标识符无法解析，直接调用原函数
+        p_result = CHECK_RESULT_PASS;
+    }
+    else if (f_type == FILE_U)
+    {
+        // 文件类型无法判断，调用原函数
+        p_result = CHECK_RESULT_PASS;
+    }
+    else
+    {
+        // 判断权限类型
+        p_type = P_U;
+        if (f_type == FILE_REG || f_type == FILE_LNK){
+            p_type = P_REG;         // 标准文件
+        }else if (f_type == FILE_DIR){
+            p_type = P_DIR;
+        }
+        
+        
+
+        if(p_type == P_U)
+        {
+            // 未定义的文件类型，调用原函数
+            p_result = CHECK_RESULT_PASS;
+        }
+        else
+        {
+            int check_ret = PRM_ERROR;
+            check_ret = admissionReq(ino, action, pid, p_type, &p_result);
+            if(check_ret != PRM_SUCCESS)
+            {
+                // 权限查询出错，默认通过
+                p_result = CHECK_RESULT_PASS;
+            }
+        }
+    }
+
+    // debug
+    // p_result = CHECK_RESULT_PASS;
+
+    // 判断权限检查结果，是否不允许执行
+    if(p_result != CHECK_RESULT_NOTPASS)
+    {
+        ret = orig_read(regs);
+    }
+    else
+    {
+        if (p_type == P_REG) printk("Block: read REG file inode=%ld\n", ino);
+        if (p_type == P_DIR) printk("Block: read DIR inode=%ld\n", ino);
+    }   
+    
+    return ret;
+}
+
+/**
+ * @brief 对sys_write重载
+ * asmlinkage long sys_write(unsigned int fd, const char __user *buf, size_t count);
+ * 
+ * 
+ * @param regs 
+ * @return asmlinkage 
+ */
+asmlinkage long hacked_write(struct pt_regs * regs)
+{
+    long ret = -1;
+
+    unsigned int fd = 0;
+    unsigned long ino = 0;
+    pid_t pid = current->pid;
+    int f_type = 0;
+    int p_result = 0;
+    int p_type;
+    int action = WRITE;
+
+    fd = regs->di;
+    if(get_info_from_fd(fd, &ino, &f_type) == PRM_ERROR)
+    {
+        // 文件标识符无法解析，直接调用原函数
+        p_result = CHECK_RESULT_PASS;
+    }
+    else if (f_type == FILE_U)
+    {
+        // 文件类型无法判断，调用原函数
+        p_result = CHECK_RESULT_PASS;
+    }
+    else
+    {
+        // 判断权限类型
+        p_type = P_U;
+        if (f_type == FILE_REG || f_type == FILE_LNK){
+            p_type = P_REG;         // 标准文件
+        }else if (f_type == FILE_DIR){
+            p_type = P_DIR;
+        }
+
+        if(p_type == P_U)
+        {
+            // 未定义的文件类型，调用原函数
+            p_result = CHECK_RESULT_PASS;
+        }
+        else
+        {
+            int check_ret = PRM_ERROR;
+            check_ret = admissionReq(ino, action, pid, p_type, &p_result);
+            if(check_ret != PRM_SUCCESS)
+            {
+                // 权限查询出错，默认通过
+                p_result = CHECK_RESULT_PASS;
+            }
+        }
+    }
+
+    // debug
+    // p_result = CHECK_RESULT_PASS;
+
+    // 判断权限检查结果，是否不允许执行
+    if(p_result != CHECK_RESULT_NOTPASS)
+    {
+        ret = orig_write(regs);
+    }
+    else
+    {
+        if (p_type == P_REG) printk("Block: write REG file inode=%ld\n", ino);
+        if (p_type == P_DIR) printk("Block: write DIR inode=%ld\n", ino);
+    }
+    
+    return ret;
+}
 
 
 
@@ -175,8 +319,8 @@ static int __init mod_init(void)
 
     //Hook Sys Call Openat
 	orig_openat = (void *) sys_call_table[__NR_openat];
-    //orig_read = (void *) sys_call_table[__NR_read];
-    //orig_write = (void *) sys_call_table[__NR_write];
+    orig_read = (void *) sys_call_table[__NR_read];
+    orig_write = (void *) sys_call_table[__NR_write];
 	
 	pte = lookup_address((unsigned long) sys_call_table, &level);
     // Change PTE to allow writing
@@ -184,8 +328,8 @@ static int __init mod_init(void)
     printk("Info: Disable write-protection of page with sys_call_table\n");
 
     sys_call_table[__NR_openat] = (sys_call_ptr_t) hacked_openat;
-    //sys_call_table[__NR_read] = (sys_call_ptr_t) hacked_read;
-    //sys_call_table[__NR_write] = (sys_call_ptr_t) hacked_write;
+    sys_call_table[__NR_read] = (sys_call_ptr_t) hacked_read;
+    sys_call_table[__NR_write] = (sys_call_ptr_t) hacked_write;
 
     set_pte_atomic(pte, pte_clear_flags(*pte, _PAGE_RW));
     printk("Info: sys_call_table hooked!\n");
@@ -202,8 +346,8 @@ static void __exit mod_exit(void)
     set_pte_atomic(pte, pte_mkwrite(*pte));
 
 	sys_call_table[__NR_openat] = (sys_call_ptr_t)orig_openat;
-    //sys_call_table[__NR_read] = (sys_call_ptr_t)orig_read;
-    //sys_call_table[__NR_write] = (sys_call_ptr_t)orig_write;
+    sys_call_table[__NR_read] = (sys_call_ptr_t)orig_read;
+    sys_call_table[__NR_write] = (sys_call_ptr_t)orig_write;
 
 	set_pte_atomic(pte, pte_clear_flags(*pte, _PAGE_RW));
 
