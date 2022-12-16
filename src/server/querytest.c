@@ -24,7 +24,7 @@ void test()
         return;
     }
 
-    ret_auth(getpid());
+    ret_auth(getpid(), 1);
 
     // // 连接数据库
     // MYSQL connection;                   /*数据库连接*/ 

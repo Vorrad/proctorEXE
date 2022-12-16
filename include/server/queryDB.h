@@ -1,4 +1,5 @@
 #include "../app/mysql.h"
+#include "../app/operation.h"
 
 #define SYSOUT "sysout.txt"     // 执行系统命令后输出保存的文件
 
@@ -10,9 +11,10 @@ typedef struct dir{
 
 /*
     @param pid: 目标程序的pid
+    @param action: 动作对应的索引
     @return 是否具有权限，0为无权，1为有权，-1为出错
 */
-int ret_auth(pid_t pid);
+int ret_auth(pid_t pid, int action);
 
 /*
     @param pid: 目标程序的pid

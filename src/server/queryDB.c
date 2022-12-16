@@ -1,6 +1,6 @@
 #include "../../include/server/queryDB.h"
 
-int ret_auth(pid_t pid)
+int ret_auth(pid_t pid, int action)
 {
     char path[PATH_SIZE];
     int res;
@@ -39,7 +39,6 @@ int ret_auth(pid_t pid)
 
         char query_buf[BUFFER_SIZE];
         sprintf(query_buf, "SELECT id FROM program WHERE path LIKE \"%s\"", dirname);
-        printf("%s\n", query_buf);
         
         int res;
         res = mysql_real_query(&connection, query_buf, (u_long) strlen(query_buf));
@@ -75,7 +74,9 @@ int ret_auth(pid_t pid)
 
     if(flag)
     {
-        /* 查询prog_id的权限表 */
+        char query_buf[BUFFER_SIZE];
+        sprintf(query_buf, "SELECT auth FROM policy WHERE prog_id=%d AND action=\"%s\"", prog_id, switchAction(action));
+        printf("querybuf: %s\n", query_buf);
     }
     else
     {
