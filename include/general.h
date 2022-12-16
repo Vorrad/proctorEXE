@@ -15,4 +15,5 @@ typedef char bool;
 #endif
 
 #define BUFFER_SIZE 4096            /*查询语句最大长度*/
+#define PATH_SIZE 1024              /*路径最大长度*/
 #define PARA_SIZE 256               /*参数最大长度*/
