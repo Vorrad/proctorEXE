@@ -46,7 +46,7 @@ static void nl_data_ready(struct sk_buff *__skb)
         ptr->type = PRM_MSG_TYPE_CONNECT_CONFIRM;
         printk("Connection message received from pid=%d\n",pid);
         printk("Send connection confirm message to pid=%d\n",pid);
-        // netlink_sendmsg((char *)ptr, sizeof(struct prm_msg));
+        netlink_sendmsg((char *)ptr, sizeof(struct prm_msg));
         fail_count = 0;
 
     }
