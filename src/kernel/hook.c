@@ -128,7 +128,7 @@ asmlinkage long hacked_openat(struct pt_regs *regs)
             else
             {
                 int check_ret = PRM_ERROR;
-                check_ret = admissionReq(ino, action, pid, p_type, &p_result);
+                check_ret = admissionReq(action, pid, p_type, &p_result);
                 if(check_ret != PRM_SUCCESS)
                 {
                     // 权限查询出错，默认通过
@@ -196,7 +196,7 @@ asmlinkage long hacked_read(struct pt_regs * regs)
         else
         {
             int check_ret = PRM_ERROR;
-            check_ret = admissionReq(ino, action, pid, p_type, &p_result);
+            check_ret = admissionReq(action, pid, p_type, &p_result);
             if(check_ret != PRM_SUCCESS)
             {
                 // 权限查询出错，默认通过
@@ -271,7 +271,7 @@ asmlinkage long hacked_write(struct pt_regs * regs)
         else
         {
             int check_ret = PRM_ERROR;
-            check_ret = admissionReq(ino, action, pid, p_type, &p_result);
+            check_ret = admissionReq(action, pid, p_type, &p_result);
             if(check_ret != PRM_SUCCESS)
             {
                 // 权限查询出错，默认通过

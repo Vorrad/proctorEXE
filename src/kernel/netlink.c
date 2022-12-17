@@ -46,7 +46,7 @@ static void nl_data_ready(struct sk_buff *__skb)
         ptr->type = PRM_MSG_TYPE_CONNECT_CONFIRM;
         printk("Connection message received from pid=%d\n",pid);
         printk("Send connection confirm message to pid=%d\n",pid);
-        netlink_sendmsg((char *)ptr, sizeof(struct prm_msg));
+        // netlink_sendmsg((char *)ptr, sizeof(struct prm_msg));
         fail_count = 0;
 
     }
@@ -63,8 +63,11 @@ static void nl_data_ready(struct sk_buff *__skb)
     }
     else if(ptr->type == PRM_MSG_TYPE_RESULT)
     {
+        printk("OOOOO\n");
         // 收到权限查询结果
         struct sem_msg* sem_msg_ptr = (struct sem_msg*)(ptr->sem_msg_ptr);
+        printk("OOOO1\n");
+        printk("SEM_STATUS_READY = %d\n",sem_msg_ptr->status);
         if(sem_msg_ptr->status == SEM_STATUS_READY)
         {
             // 正在等待结果
@@ -82,7 +85,7 @@ static void nl_data_ready(struct sk_buff *__skb)
     kfree(buf);
 }
 
-int admissionReq(unsigned long ino, int action, pid_t pid_c, int p_type, int *result)
+int admissionReq(int action, pid_t pid_c, int p_type, int *result)
 {
     struct prm_msg msg;
     struct sem_msg *ptr = NULL;
@@ -104,7 +107,7 @@ int admissionReq(unsigned long ino, int action, pid_t pid_c, int p_type, int *re
     // 构建消息
     msg.index = atomic_inc_return(&index);
     msg.type = PRM_MSG_TYPE_CHECK;
-    msg.ino = (u32)ino;
+    // msg.ino = (u32)ino;
     msg.pid = (u32)pid_c;
     msg.action = (s32)action;
     msg.p_type = (s32)p_type;
@@ -114,7 +117,9 @@ int admissionReq(unsigned long ino, int action, pid_t pid_c, int p_type, int *re
     netlink_sendmsg((char *)&msg, sizeof(struct sem_msg));
     // 等待返回消息
     // down(&(ptr->sem));
-    down_ret = down_timeout(&(ptr->sem), SEM_WAIT_CYCLE); // 在SEM_WAIT_CYCLE个时钟周期内等待信号量
+    down_ret = down_timeout(&(ptr->sem), SEM_WAIT_CYCLE); 
+    // 在SEM_WAIT_CYCLE个时钟周期内等待信号量
+    //down_ret = 0;
     if(down_ret != 0)
     {
         fail_count += 1;

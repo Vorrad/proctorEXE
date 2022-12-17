@@ -30,8 +30,7 @@ struct prm_nlmsg {
 // 用户态与核心态之间发送的消息的结构
 struct prm_msg {
     s32     index;      // 在模块中使用atomic_t的值，为了减少处理，取值范围是signed int
-    u32     type;       // 消息类型
-    u32     ino;            // inode编号
+    u32     type;       // 消息类型 //inode编号
     u32     pid;            // 用户pid
     s32     action;         // 操作类型
     s32     p_type;         // 权限类型
@@ -73,14 +72,14 @@ struct prm_msg {
 
 // 用户内核态进程间数据传递的结构体
 struct sem_msg {
-    u32     status; 
+    s32     status; 
     s32     data;           // 取值与prm_msg.result_type一致
     struct semaphore    sem;
 };
 
 // sem_msg的status取值
-#define SEM_STATUS_READY    (u32)0x0f0f0f0f     // 初始化完成，等待写入数据
-#define SEM_STATUS_LOADED   (u32)0xf0f0f0f0     // 已经写入数据，等待读取
+#define SEM_STATUS_READY    (s32)0     // 初始化完成，等待写入数据
+#define SEM_STATUS_LOADED   (s32)1     // 已经写入数据，等待读取
 
 
 int netlink_init(void);
@@ -88,7 +87,7 @@ int netlink_release(void);
 
 int netlink_sendmsg(char *buf, size_t len);
 
-int admissionReq(unsigned long ino,int action, pid_t pid, int p_type, int *result);
+int admissionReq(int action, pid_t pid, int p_type, int *result);
 
 
 
