@@ -272,7 +272,8 @@ int msg_handle(struct prm_msg *msg)
         if (msg->p_type == P_DEMESG)
         {
             printf("Check rights: dmesg\n");
-            result = ret_auth(msg->pid,msg->action);
+            //result = ret_auth(msg->pid,msg->action);
+            result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -288,7 +289,8 @@ int msg_handle(struct prm_msg *msg)
         {
             // 禁止1001对于net的访问
             printf("Check rights: net\n");
-            result = ret_auth(msg->pid,msg->action);
+            //result = ret_auth(msg->pid,msg->action);
+            result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -304,7 +306,8 @@ int msg_handle(struct prm_msg *msg)
         {
             // 禁止root重启
             printf("Check rights: reboot\n");
-            result = ret_auth(msg->pid,msg->action);
+            //result = ret_auth(msg->pid,msg->action);
+            result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -320,7 +323,8 @@ int msg_handle(struct prm_msg *msg)
         else if (msg->p_type == P_REG)
         {
             printf("Check rights: REG %u\n", msg->pid);
-            result = ret_auth(msg->pid,msg->action);
+            //result = ret_auth(msg->pid,msg->action);
+            result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -335,7 +339,8 @@ int msg_handle(struct prm_msg *msg)
         else if (msg->p_type == P_DIR)
         {
             printf("Check rights: DIR %u\n", msg->pid);
-            result = ret_auth(msg->pid,msg->action);
+            //result = ret_auth(msg->pid,msg->action);
+            result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -364,3 +369,34 @@ int msg_handle(struct prm_msg *msg)
     return PRM_SUCCESS;
 }
 
+int main ()
+{
+if(fork()){
+    char buf[1024];
+    char msg[1024];
+    
+    // scanf("%s", msg);
+    u2k_socket_init();
+    printf("init succees\n");
+
+    // scanf("%s", msg);
+    u2k_connect();
+    printf("connect!\n");
+
+    while(1)
+    {   
+        u2k_recv(buf, 1024);
+        msg_handle((struct prm_msg *)buf);
+        printf("handel finish\n");
+    }
+
+    scanf("%s", msg);
+    u2k_disconnect();
+    printf("disconnect");
+
+    // scanf("%s", msg);
+    u2k_socket_release();
+    printf("Release!");
+}
+    return 0;
+}

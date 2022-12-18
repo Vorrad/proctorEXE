@@ -40,33 +40,3 @@ void test()
     // mysql_close(&connection);
 }
 
-    
-int main ()
-{
-    char buf[1024];
-    char msg[1024];
-    
-    // scanf("%s", msg);
-    u2k_socket_init();
-    printf("init succees\n");
-
-    // scanf("%s", msg);
-    u2k_connect();
-    printf("connect!\n");
-
-    while(1)
-    {   
-        u2k_recv(buf, 1024);
-        msg_handle((struct prm_msg *)buf);
-        printf("handel finish\n");
-    }
-
-    scanf("%s", msg);
-    u2k_disconnect();
-    printf("disconnect");
-
-    // scanf("%s", msg);
-    u2k_socket_release();
-    printf("Release!");
-    return 0;
-}
