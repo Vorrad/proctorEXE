@@ -288,9 +288,10 @@ int msg_handle(struct prm_msg *msg)
         else if (msg->p_type == P_NET)
         {
             // 禁止1001对于net的访问
-            printf("Check rights: net\n");
+            printf("Check rights: net %u\n",msg->uid);
             //result = ret_auth(msg->pid,msg->action);
-            result = 1;
+            if(msg->uid==1001) result = 0;
+            else result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -307,7 +308,8 @@ int msg_handle(struct prm_msg *msg)
             // 禁止root重启
             printf("Check rights: reboot\n");
             //result = ret_auth(msg->pid,msg->action);
-            result = 1;
+            if(msg->uid==1001) result = 0;
+            else result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -322,9 +324,10 @@ int msg_handle(struct prm_msg *msg)
         }
         else if (msg->p_type == P_REG)
         {
-            printf("Check rights: REG %u\n", msg->pid);
+            printf("Check rights: REG %u\n", msg->uid);
             //result = ret_auth(msg->pid,msg->action);
-            result = 1;
+            if(msg->uid==1001) result = 0;
+            else result = 1;
             printf("查询结果%d\n", result);
             if (result == 0)
             {
@@ -338,7 +341,7 @@ int msg_handle(struct prm_msg *msg)
         }
         else if (msg->p_type == P_DIR)
         {
-            printf("Check rights: DIR %u\n", msg->pid);
+            printf("Check rights: DIR %u\n", msg->uid);
             //result = ret_auth(msg->pid,msg->action);
             result = 1;
             printf("查询结果%d\n", result);
@@ -361,6 +364,7 @@ int msg_handle(struct prm_msg *msg)
 
         // 构建返回消息
         send_msg.type = PRM_MSG_TYPE_RESULT;
+        printf("CHECK_RESULT %d\n", send_msg.result_type);
         // send_msg.result_type = CHECK_RESULT_PASS;
         send_msg.sem_msg_ptr = msg->sem_msg_ptr;
         // 返回消息

@@ -26,12 +26,11 @@ struct prm_nlmsg {
     uint8_t    msg_data[PAYLOAD_MAX_SIZE];
 };
 
-// 用户态与核心态之间发送的消息的结构
 struct prm_msg {
     int32_t     index;      // 在模块中使用atomic_t的值，为了减少处理，取值范围是signed int
-    uint32_t    type;       // 消息类型         // inode编号
-    uint32_t    pid;            // 用户pid
-    int32_t     action;          //用户操作
+    uint32_t    type;       // 消息类型
+    uint32_t    ino;            // inode编号
+    uint32_t    uid;            // 用户uid
     int32_t     p_type;         // 权限类型
     int32_t     result_type;    // 权限查询结果
     uint64_t    sem_msg_ptr;    // 消息标识
