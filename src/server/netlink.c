@@ -1,15 +1,4 @@
-/**
- * @file my_user.c
- * @author fg (you@domain.com)
- * @brief netlink moduel in user mode
- * @version 0.1
- * @date 2022-10-20
- * 
- * @copyright Copyright (c) 2022
- * 
- */
-
-#include "user_netlink.h"
+#include "netlink.h"
 #include "../../include/general.h"
 #include "../../include/app/mysql.h"
 #include "../../include/app/operation.h"
@@ -26,7 +15,7 @@ static struct prm_nlmsg    *msg = NULL;            // message buffer
  * 
  * @return If this function succeeds, return PRM_SUCCESS, else return PRM_ERROR
  */
-int u2k_socket_init()
+int socket_init()
 {
     // Create netlink socket
     netlink_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_PRM);
@@ -90,7 +79,7 @@ int u2k_socket_init()
  * 
  * @return PRM_SUCCESS
  */
-int u2k_socket_release()
+int socket_release()
 {
     close(netlink_socket);
     free(msg);
@@ -113,7 +102,7 @@ int u2k_socket_release()
  * @param len the num of bytes to be sent
  * @return PRM_SUCCESS for success, PRM_ERROR for error.
  */
-int u2k_send(char *buf, size_t len)
+int send(char *buf, size_t len)
 {
     if(buf == NULL)
     {
@@ -130,19 +119,8 @@ int u2k_send(char *buf, size_t len)
     memset(&(msg->msg_len), 0, PAYLOAD_MAX_SIZE+4);
     memcpy(msg->msg_data, buf, len);
     msg->msg_len = len;
-    // printf("try to send 2\n");
+    // printf("try to send 2\n")
     
-    // printf("%d\n", msg->msg_len);
-    // struct prm_msg *ptr = msg->msg_data;
-    // printf("%d\n", ptr->index);
-    // printf("%08x\n", ptr->type);
-    // printf("%08x\n", ptr->ino);
-    // printf("%08x\n", ptr->uid);
-    // printf("%d\n", ptr->p_type);
-    // printf("%d\n", ptr->result_type);
-    // printf("%016lx\n", ptr->sem_msg_ptr);
-    
-
     ssize_t send_len = sendto(netlink_socket, msg, msg->nlh.nlmsg_len, 0, (struct sockaddr *)kernel_addr, sizeof(struct sockaddr_nl));
     // printf("=========\n");
     if(send_len == -1)
@@ -160,7 +138,7 @@ int u2k_send(char *buf, size_t len)
  * @param buflen length of buf
  * @return If this function succeeds, return num of received bytes, else return PRM_ERROR
  */
-ssize_t u2k_recv(char *buf, size_t buflen)
+ssize_t recv(char *buf, size_t buflen)
 {
     if(buf == NULL)
     {
@@ -192,7 +170,7 @@ ssize_t u2k_recv(char *buf, size_t buflen)
  * 
  * @return int PRM_SUCCESS 成功，PRM_ERROR 失败
  */
-int u2k_connect()
+int connect()
 {
     char buf[1024];
     struct prm_msg msg;
@@ -204,13 +182,13 @@ int u2k_connect()
     msg.index = 0;
     msg.type = PRM_MSG_TYPE_CONNECT;
     // 发送连接请求
-    send_ret = u2k_send((char*)&msg, sizeof(struct prm_msg));
+    send_ret = send((char*)&msg, sizeof(struct prm_msg));
     if(send_ret != PRM_SUCCESS)
     {
         return PRM_ERROR;
     }
     // 等待确认消息
-    recv_ret = u2k_recv(buf, 1024);
+    recv_ret = recv(buf, 1024);
     recv_msg_ptr = (struct prm_msg *)buf;
     if(recv_msg_ptr->type == PRM_MSG_TYPE_CONNECT_CONFIRM)
     {
@@ -224,12 +202,12 @@ int u2k_connect()
  * 
  * @return int 
  */
-int u2k_disconnect()
+int disconnect()
 {
     struct prm_msg mmm;
     memset((void *)&mmm, 0, sizeof(mmm));
     mmm.type = PRM_MSG_TYPE_DISCONNECT;
-    u2k_send((char *)&mmm, sizeof(struct prm_msg));
+    send((char *)&mmm, sizeof(struct prm_msg));
 }
 
 
@@ -238,14 +216,14 @@ int u2k_disconnect()
  * 
  * @return int PRM_SUCCESS成功，PRM_ERROR失败
  */
-int u2k_reconnect()
+int reconnect()
 {
-    u2k_socket_release();
-    if(u2k_socket_init() != PRM_SUCCESS)
+    socket_release();
+    if(socket_init() != PRM_SUCCESS)
     {
         return PRM_ERROR;
     }
-    if(u2k_connect() != PRM_SUCCESS)
+    if(connect() != PRM_SUCCESS)
     {
         return PRM_ERROR;
     }
@@ -368,7 +346,7 @@ int msg_handle(struct prm_msg *msg)
         // send_msg.result_type = CHECK_RESULT_PASS;
         send_msg.sem_msg_ptr = msg->sem_msg_ptr;
         // 返回消息
-        u2k_send((char *)&send_msg, sizeof(struct prm_msg));
+        send((char *)&send_msg, sizeof(struct prm_msg));
     }
     return PRM_SUCCESS;
 }
@@ -380,26 +358,26 @@ if(fork()){
     char msg[1024];
     
     // scanf("%s", msg);
-    u2k_socket_init();
+    socket_init();
     printf("init succees\n");
 
     // scanf("%s", msg);
-    u2k_connect();
+    connect();
     printf("connect!\n");
 
     while(1)
     {   
-        u2k_recv(buf, 1024);
+        recv(buf, 1024);
         msg_handle((struct prm_msg *)buf);
         printf("handel finish\n");
     }
 
     scanf("%s", msg);
-    u2k_disconnect();
+    disconnect();
     printf("disconnect");
 
     // scanf("%s", msg);
-    u2k_socket_release();
+    socket_release();
     printf("Release!");
 }
     return 0;
